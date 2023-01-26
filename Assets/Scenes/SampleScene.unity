@@ -344,13 +344,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0f42868cdffc64b948dfb3e3cf4c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTransform: {fileID: 2134578349}
-  CameraTransform: {fileID: 963194228}
-  CameraPivotTransform: {fileID: 1148218261}
+  Target: {fileID: 2134578349}
+  Camera: {fileID: 963194228}
+  Pivot: {fileID: 1148218261}
   LookSpeed: 0.1
   FollowSpeed: 0.1
   PivotSpeed: 0.03
-  CameraSphereRadius: 0.2
+  SphereRadius: 0.2
   CameraCollisionOffset: 0.2
   MinimumCollisionOffset: 0.2
 --- !u!4 &844652512
@@ -673,9 +673,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627a7f015d4990c479ff5e8c524e37f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 0}
-  inputHandler: {fileID: 0}
-  playerLocoMotion: {fileID: 0}
+  Animator: {fileID: 0}
   CanRotate: 1
 --- !u!1 &2134578348
 GameObject:
@@ -726,10 +724,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5145d5ac5fc062c469d9676b3117e6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _transform: {fileID: 0}
-  _animatorHandler: {fileID: 0}
   Rigidbody: {fileID: 0}
-  NormalCamera: {fileID: 0}
   _movementSpeed: 5
   _rotationSpeed: 10
 --- !u!114 &2134578351
@@ -744,14 +739,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6478c49bb183a8649ab90f4594bb68e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontal: 0
-  vertical: 0
-  moveAmount: 0
-  mouseX: 0
-  mouseY: 0
-  b_Input: 0
-  rollFlag: 0
-  isInteracting: 0
+  Horizontal: 0
+  Vertical: 0
+  MoveAmount: 0
+  MouseX: 0
+  MouseY: 0
+  Input: 0
+  RollFlag: 0
+  IsInteracting: 0
 --- !u!54 &2134578352
 Rigidbody:
   m_ObjectHideFlags: 0

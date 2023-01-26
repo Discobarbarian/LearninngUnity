@@ -1,110 +1,72 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimatorHandler : MonoBehaviour
 {
-    public Animator animator;
-    public InputHandler inputHandler;
-    public PlayerLocoMotion playerLocoMotion;
+    public Animator Animator;
+    private InputHandler _inputHandler;
+    private PlayerLocoMotion _playerLocoMotion;
 
-    int vertical;
-    int horizontal;
+    private int _vertical;
+    private int _horizontal;
 
     public bool CanRotate;
 
     public void Init()
     {
-        animator = GetComponent<Animator>();
-        inputHandler = GetComponentInParent<InputHandler>();
-        playerLocoMotion = GetComponentInParent<PlayerLocoMotion>();
-        vertical = Animator.StringToHash("Vertical");
-        horizontal = Animator.StringToHash("Horizontal");
+        Animator = GetComponent<Animator>();
+        _inputHandler = GetComponentInParent<InputHandler>();
+        _playerLocoMotion = GetComponentInParent<PlayerLocoMotion>();
+        _vertical = Animator.StringToHash("Vertical");
+        _horizontal = Animator.StringToHash("Horizontal");
     }
 
     public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement)
     {
-        #region Vertical
-        float v = 0f;
+        verticalMovement = ValidateInput(verticalMovement);
+        horizontalMovement = ValidateInput(horizontalMovement);
 
-        if (verticalMovement > 0 && verticalMovement < 0.55f)
-        {
-            v = 0.5f;
-        }
-        else if (verticalMovement > 0.55f)
-        {
-            v = 1;
-        }
-        else if (verticalMovement < 0 && verticalMovement > -0.55f)
-        {
-            v = -0.5f;
-        }
-        else if (verticalMovement < -0.55f)
-        {
-            v = -1f;
-        }
-        else
-        {
-            v = 0f;
-        }
-        #endregion
+        Animator.SetFloat(_vertical, verticalMovement, 0.1f, Time.deltaTime);
+        Animator.SetFloat(_horizontal, horizontalMovement, 0.1f, Time.deltaTime);
+    }
 
-        #region Horizontal
-        float h = 0f;
+    private float ValidateInput (float parameter)
+    {
+        float abs = Mathf.Abs(parameter);
+        float sign = Mathf.Sign(parameter);
 
-        if (horizontalMovement > 0 && horizontalMovement < 0.55f)
-        {
-            h = 0.5f;
-        }
-        else if (horizontalMovement > 0.55f)
-        {
-            h = 1;
-        }
-        else if (horizontalMovement < 0 && horizontalMovement > -0.55f)
-        {
-            h = -0.5f;
-        }
-        else if (horizontalMovement < -0.55f)
-        {
-            h = -1f;
-        }
-        else
-        {
-            h = 0f;
-        }
-        #endregion
+        if (abs > 0.55f) abs = 1f;
+        else if (abs > 0f) abs = 0.5f;
 
-        animator.SetFloat(vertical, v, 0.1f, Time.deltaTime);
-        animator.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
+        return abs * sign;
     }
 
     public void PlayTargetAnimation(string targetAnim, bool isInteracting)
     {
-        animator.applyRootMotion = isInteracting;
-        animator.SetBool("isInteracting", isInteracting);
-        animator.CrossFade(targetAnim, 0.2f);
+        Animator.applyRootMotion = isInteracting;
+        Animator.SetBool("isInteracting", isInteracting);
+        Animator.CrossFade(targetAnim, 0.2f);
     }
-    public void AllowRotation()
+    private void AllowRotation()
     {
         CanRotate = true;
     }
 
-    public void BanRotation()
+    private void BanRotation()
     {
         CanRotate = false;
     }
 
     private void OnAnimatorMove()
     {
-        if (inputHandler.isInteracting == false)
+        if (_inputHandler.IsInteracting == false)
             return;
 
         float delta = Time.deltaTime;
-        playerLocoMotion.Rigidbody.drag = 0;
-        Vector3 deltaPosition = animator.deltaPosition;
+        _playerLocoMotion.Rigidbody.drag = 0;
+        Vector3 deltaPosition = Animator.deltaPosition;
         deltaPosition.y = 0;
         Vector3 velocity = deltaPosition / delta;
         //velocity.z = 2f;
-        playerLocoMotion.Rigidbody.velocity = velocity; //this line disables player model movement wlile rolling, but i need to make little thrust
+        _playerLocoMotion.Rigidbody.velocity = velocity; //this line disables player model movement wlile rolling, but i need to make little thrust
     }
 }

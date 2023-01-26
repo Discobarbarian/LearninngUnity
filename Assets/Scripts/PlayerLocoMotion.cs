@@ -4,74 +4,70 @@ using UnityEngine;
 
 public class PlayerLocoMotion : MonoBehaviour
 {
-    Transform cameraObject;
-    InputHandler inputHandler;
-    Vector3 moveDirection;
+    private Transform _cameraObject;
+    private InputHandler _inputHandler;
+    private Vector3 _normalVector;
+    private Vector3 _targetPosition;
+    private Vector3 _moveDirection;
 
-    [HideInInspector] public Transform _transform;
-    [HideInInspector] public AnimatorHandler _animatorHandler;
+    private Transform _transform;
+    private AnimatorHandler _animatorHandler;
 
     public Rigidbody Rigidbody;
-    public GameObject NormalCamera;
 
     [Header("Options")]
     [SerializeField] float _movementSpeed = 5f;
     [SerializeField] float _rotationSpeed = 10f;
-    void Start()
+
+    private void Start()
     {
         Rigidbody = GetComponent<Rigidbody>();
-        inputHandler = GetComponent<InputHandler>();
+        _inputHandler = GetComponent<InputHandler>();
         _animatorHandler = GetComponentInChildren<AnimatorHandler>();
-        cameraObject = Camera.main.transform;
+        _cameraObject = Camera.main.transform;
         _transform = transform;
         _animatorHandler.Init();
     }
 
-    public void Update()
+    private void Update()
     {
         float delta = Time.deltaTime;
 
-        inputHandler.TickInput(delta);
+        _inputHandler.TickInput(delta);
         HandleMovement(delta);
         HandleRollingAndSprinting(delta);
     }
 
-    #region Movement
-    Vector3 _normalVector;
-    Vector3 _targerPosition;
-
     private void HandleRotation(float delta)
     {
         Vector3 targetDirection = Vector3.zero;
-        float moveOverride = inputHandler.moveAmount;
+        float moveOverride = _inputHandler.MoveAmount;
 
-        targetDirection = cameraObject.forward * inputHandler.vertical;
-        targetDirection += cameraObject.right * inputHandler.horizontal;
+        targetDirection = _cameraObject.forward * _inputHandler.Vertical;
+        targetDirection += _cameraObject.right * _inputHandler.Horizontal;
         targetDirection.Normalize();
         targetDirection.y = 0f;
 
         if(targetDirection == Vector3.zero) targetDirection = _transform.forward;
 
-        float rotationSpeed = _rotationSpeed;
         Quaternion tr = Quaternion.LookRotation(targetDirection);
-        Quaternion targetRotation = Quaternion.Slerp(_transform.rotation, tr, rotationSpeed * delta);
+        Quaternion targetRotation = Quaternion.Slerp(_transform.rotation, tr, _rotationSpeed * delta);
 
         _transform.rotation = targetRotation;
     }
 
-    public void HandleMovement(float delta)
+    private void HandleMovement(float delta)
     {
-        moveDirection = cameraObject.forward * inputHandler.vertical;
-        moveDirection += cameraObject.right * inputHandler.horizontal;
-        moveDirection.Normalize();
-        moveDirection.y = 0f;
+        _moveDirection = _cameraObject.forward * _inputHandler.Vertical;
+        _moveDirection += _cameraObject.right * _inputHandler.Horizontal;
+        _moveDirection.Normalize();
+        _moveDirection.y = 0f;
 
-        float speed = _movementSpeed;
-        moveDirection *= speed;
+        _moveDirection *= _movementSpeed;
 
-        Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, _normalVector);
+        Vector3 projectedVelocity = Vector3.ProjectOnPlane(_moveDirection, _normalVector);
         Rigidbody.velocity = projectedVelocity;
-        _animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0f);
+        _animatorHandler.UpdateAnimatorValues(_inputHandler.MoveAmount, 0f);
 
         if (_animatorHandler.CanRotate)
         {
@@ -79,28 +75,23 @@ public class PlayerLocoMotion : MonoBehaviour
         }
     }
 
-    public void HandleRollingAndSprinting(float delta)
+    private void HandleRollingAndSprinting(float delta)
     {
-        if (_animatorHandler.animator.GetBool("isInteracting"))
-            return;
+        if (_animatorHandler.Animator.GetBool("isInteracting")) return;
+        if (!_inputHandler.RollFlag) return;
+        
+        _moveDirection = _cameraObject.forward * _inputHandler.Vertical;
+        _moveDirection += _cameraObject.right * _inputHandler.Horizontal;
 
-        if (inputHandler.rollFlag)
+        if (_inputHandler.MoveAmount > 0)
         {
-            moveDirection = cameraObject.forward * inputHandler.vertical;
-            moveDirection += cameraObject.right * inputHandler.horizontal;
-
-            if (inputHandler.moveAmount > 0)
-            {
-                _animatorHandler.PlayTargetAnimation("Roll", true);
-                moveDirection.y = 0;
-                Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = rollRotation;
-            }
-            else
-            {
-                _animatorHandler.PlayTargetAnimation("StepBack", true);
-            }
+            _animatorHandler.PlayTargetAnimation("Roll", true);
+            _moveDirection.y = 0;
+            Quaternion rollRotation = Quaternion.LookRotation(_moveDirection);
+            transform.rotation = rollRotation;
+            return;
         }
+
+        _animatorHandler.PlayTargetAnimation("StepBack", true);
     }
-    #endregion
 }

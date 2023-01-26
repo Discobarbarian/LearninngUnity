@@ -4,53 +4,52 @@ using UnityEngine;
 
 public class InputHandler : MonoBehaviour
 {
-    public float horizontal;
-    public float vertical;
-    public float moveAmount;
-    public float mouseX;
-    public float mouseY;
+    public float Horizontal;
+    public float Vertical;
+    public float MoveAmount;
+    public float MouseX;
+    public float MouseY;
 
-    public bool b_Input;
-    public bool rollFlag;
+    public bool Input;
+    public bool RollFlag;
+    public bool IsInteracting;
 
-    public bool isInteracting;
+    private PlayerControls _inputActions;
+    private CameraHandler _cameraHandler;
 
-    PlayerControls inputActions;
-    CameraHandler cameraHandler;
-
-    Vector2 movementInput;
-    Vector2 cameraInput;
+    private Vector2 _movementInput;
+    private Vector2 _cameraInput;
 
     private void Awake()
     {
-        cameraHandler = CameraHandler._singleton;    
+        _cameraHandler = CameraHandler.SINGLETON;    
     }
 
     private void FixedUpdate()
     {
         float delta = Time.fixedDeltaTime;
 
-        if (cameraHandler != null)
+        if (_cameraHandler != null)
         {
-            cameraHandler.FollowTarget(delta);
-            cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
+            _cameraHandler.FollowTarget(delta);
+            _cameraHandler.HandleCameraRotation(delta, MouseX, MouseY);
         }
     }
 
-    public void OnEnable()
+    private void OnEnable()
     {
-        if (inputActions == null)
+        if (_inputActions == null)
         {
-            inputActions = new PlayerControls();
-            inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
-            inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+            _inputActions = new PlayerControls();
+            _inputActions.PlayerMovement.Movement.performed += inputActions => _movementInput = inputActions.ReadValue<Vector2>();
+            _inputActions.PlayerMovement.Camera.performed += i => _cameraInput = i.ReadValue<Vector2>();
         }
-        inputActions.Enable();
+        _inputActions.Enable();
     }
 
     private void OnDisable()
     {
-        inputActions.Disable();
+        _inputActions.Disable();
     }
 
     public void TickInput(float delta)
@@ -61,20 +60,20 @@ public class InputHandler : MonoBehaviour
 
     private void MoveInput(float delta)
     {
-        horizontal = movementInput.x;
-        vertical = movementInput.y;
-        moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
-        mouseX = cameraInput.x;
-        mouseY = cameraInput.y;
+        Horizontal = _movementInput.x;
+        Vertical = _movementInput.y;
+        MoveAmount = Mathf.Clamp01(Mathf.Abs(Horizontal) + Mathf.Abs(Vertical));
+        MouseX = _cameraInput.x;
+        MouseY = _cameraInput.y;
     }
 
     private void HandleRollInput(float delta)
     {
-        b_Input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+        Input = _inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
 
-        if (b_Input)
+        if (Input)
         {
-            rollFlag = true;
+            RollFlag = true;
         }
     }
 }
